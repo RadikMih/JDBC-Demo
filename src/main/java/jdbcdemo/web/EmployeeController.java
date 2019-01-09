@@ -3,6 +3,7 @@ package jdbcdemo.web;
 
 import jdbcdemo.data.base.EmployeeRepository;
 import jdbcdemo.models.Employee;
+import jdbcdemo.services.base.EmployeeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -17,17 +18,17 @@ import java.util.Properties;
 
 @RestController
 @RequestMapping("api/employees")
-public class EmployeesController {
-    private EmployeeRepository repository;
+public class EmployeeController {
+    private EmployeeService service;
 
     @Autowired
-    public EmployeesController(EmployeeRepository repository){
-        this.repository = repository;
+    public EmployeeController(EmployeeService service) {
+        this.service = service;
     }
 
     @RequestMapping("/")
     private List<Employee> getAll() {
-        return repository.getAll();
+        return service.getAll();
     }
 
 }
