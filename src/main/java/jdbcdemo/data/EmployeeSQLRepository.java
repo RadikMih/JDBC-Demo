@@ -1,9 +1,8 @@
-package jdbcdemo.web;
+package jdbcdemo.data;
 
-
+import jdbcdemo.data.base.EmployeeRepository;
 import jdbcdemo.models.Employee;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.stereotype.Repository;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -13,12 +12,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
-@RestController
-@RequestMapping("api/employees")
-public class EmployeeService {
-
-    @RequestMapping("/")
-    private List<Employee> getAll() {
+@Repository
+public class EmployeeSQLRepository implements EmployeeRepository {
+    @Override
+    public List<Employee> getAll() {
         String configFile = "src\\main\\resources\\application.properties";
         Properties dbConfig = new Properties();
         try (FileInputStream fis = new FileInputStream(configFile)) {
@@ -29,11 +26,9 @@ public class EmployeeService {
             System.out.println("Unable to read properties file");
         }
 
-
         String dbUrl = dbConfig.getProperty("dbUrl");
         String username = dbConfig.getProperty("username");
         String password = dbConfig.getProperty("password");
-
 
         List<Employee> employees = new ArrayList<>();
         try (
@@ -55,5 +50,4 @@ public class EmployeeService {
         }
         return employees;
     }
-
 }
