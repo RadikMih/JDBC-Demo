@@ -14,11 +14,20 @@ import java.util.Properties;
 
 @Repository
 public class EmployeeSQLRepository implements EmployeeRepository {
-    @Override
-    public List<Employee> getAll() {
-        String configFile = "src\\main\\resources\\application.properties";
+    private final String CONFIG_FILE = "src\\main\\resources\\application.properties";
+
+    private String dbUrl;
+    private String username;
+    private String password;
+
+    EmployeeSQLRepository() {
+        dbUrl = username = password = "";
+    }
+
+    private void loadDbConfig() {
+        if (dbUrl.equals("")){
         Properties dbConfig = new Properties();
-        try (FileInputStream fis = new FileInputStream(configFile)) {
+        try (FileInputStream fis = new FileInputStream(CONFIG_FILE)) {
             dbConfig.load(fis);
         } catch (FileNotFoundException e) {
             System.out.println("Properties file not found");
@@ -26,11 +35,17 @@ public class EmployeeSQLRepository implements EmployeeRepository {
             System.out.println("Unable to read properties file");
         }
 
-        String dbUrl = dbConfig.getProperty("dbUrl");
-        String username = dbConfig.getProperty("username");
-        String password = dbConfig.getProperty("password");
+        dbUrl = dbConfig.getProperty("dbUrl");
+        username = dbConfig.getProperty("username");
+        password = dbConfig.getProperty("password");
+        }
+    }
 
+    @Override
+    public List<Employee> getAll() {
+        loadDbConfig();
         List<Employee> employees = new ArrayList<>();
+
         try (
                 Connection connection = DriverManager.getConnection(dbUrl, username, password);
                 Statement statement = connection.createStatement();
@@ -38,13 +53,7 @@ public class EmployeeSQLRepository implements EmployeeRepository {
             System.out.println("Connection created!");
             String query = "select FirstName, LastName, JobTitle from employees";
             ResultSet result = statement.executeQuery(query);
-            while (result.next()) {
-                Employee e = new Employee(
-                        result.getString("FirstName"),
-                        result.getString("LastName"),
-                        result.getString("JobTitle"));
-                employees.add(e);
-            }
+            readEmployeesData(employees, result);
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
@@ -53,20 +62,7 @@ public class EmployeeSQLRepository implements EmployeeRepository {
 
     @Override
     public List<Employee> findByName(String name) {
-        String configFile = "src\\main\\resources\\application.properties";
-        Properties dbConfig = new Properties();
-        try (FileInputStream fis = new FileInputStream(configFile)) {
-            dbConfig.load(fis);
-        } catch (FileNotFoundException e) {
-            System.out.println("Properties file not found");
-        } catch (IOException e) {
-            System.out.println("Unable to read properties file");
-        }
-
-        String dbUrl = dbConfig.getProperty("dbUrl");
-        String username = dbConfig.getProperty("username");
-        String password = dbConfig.getProperty("password");
-
+        loadDbConfig();
 
         String query = "select FirstName, LastName, JobTitle from employees " +
                 "where FirstName = ?";
@@ -82,16 +78,20 @@ public class EmployeeSQLRepository implements EmployeeRepository {
             statement.setString(1, name);
 
             ResultSet result = statement.executeQuery();
-            while (result.next()) {
-                Employee e = new Employee(
-                        result.getString("FirstName"),
-                        result.getString("LastName"),
-                        result.getString("JobTitle"));
-                employees.add(e);
-            }
+            readEmployeesData(employees, result);
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
         return employees;
+    }
+
+    private void readEmployeesData(List<Employee> employees, ResultSet result) throws SQLException {
+        while (result.next()) {
+            Employee e = new Employee(
+                    result.getString("FirstName"),
+                    result.getString("LastName"),
+                    result.getString("JobTitle"));
+            employees.add(e);
+        }
     }
 }
