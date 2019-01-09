@@ -10,4 +10,9 @@ public class EmployeeFileRepository implements EmployeeRepository {
     public List<Employee> getAll() {
         return null;
     }
+
+    @Override
+    public List<Employee> findByName(String name) {
+        return null;
+    }
 }

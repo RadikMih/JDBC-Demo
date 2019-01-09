@@ -21,4 +21,9 @@ public class EmployeeServiceImpl implements EmployeeService {
     public List<Employee> getAll() {
         return repository.getAll();
     }
+
+    @Override
+    public List<Employee> findByName(String name) {
+        return repository.findByName(name);
+    }
 }

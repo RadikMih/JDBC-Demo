@@ -5,8 +5,7 @@ import jdbcdemo.data.base.EmployeeRepository;
 import jdbcdemo.models.Employee;
 import jdbcdemo.services.base.EmployeeService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -26,9 +25,13 @@ public class EmployeeController {
         this.service = service;
     }
 
-    @RequestMapping("/")
+    @GetMapping("/")
     private List<Employee> getAll() {
         return service.getAll();
     }
 
+    @GetMapping("/find/{name}")
+    List<Employee> findByName(@PathVariable("name") String name){
+        return service.findByName(name);
+    }
 }

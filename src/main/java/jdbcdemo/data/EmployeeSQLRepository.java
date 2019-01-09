@@ -50,4 +50,48 @@ public class EmployeeSQLRepository implements EmployeeRepository {
         }
         return employees;
     }
+
+    @Override
+    public List<Employee> findByName(String name) {
+        String configFile = "src\\main\\resources\\application.properties";
+        Properties dbConfig = new Properties();
+        try (FileInputStream fis = new FileInputStream(configFile)) {
+            dbConfig.load(fis);
+        } catch (FileNotFoundException e) {
+            System.out.println("Properties file not found");
+        } catch (IOException e) {
+            System.out.println("Unable to read properties file");
+        }
+
+        String dbUrl = dbConfig.getProperty("dbUrl");
+        String username = dbConfig.getProperty("username");
+        String password = dbConfig.getProperty("password");
+
+
+        String query = "select FirstName, LastName, JobTitle from employees " +
+                "where FirstName = ?";
+
+        List<Employee> employees = new ArrayList<>();
+
+        try (
+                Connection connection = DriverManager.getConnection(dbUrl, username, password);
+               PreparedStatement statement = connection.prepareStatement(query);
+        ) {
+            System.out.println("Connection created!");
+
+            statement.setString(1, name);
+
+            ResultSet result = statement.executeQuery();
+            while (result.next()) {
+                Employee e = new Employee(
+                        result.getString("FirstName"),
+                        result.getString("LastName"),
+                        result.getString("JobTitle"));
+                employees.add(e);
+            }
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+        return employees;
+    }
 }
